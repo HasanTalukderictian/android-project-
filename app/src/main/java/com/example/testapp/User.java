@@ -1,9 +1,19 @@
 package com.example.testapp;
 
+import com.google.gson.annotations.SerializedName;
+
 public class User {
+
+    @SerializedName("fullname")
     private String fullName;
+
+    @SerializedName("email")
     private String email;
+
+    @SerializedName("phone")
     private String phone;
+
+    @SerializedName("password")
     private String password;
 
     // Constructor
@@ -14,7 +24,7 @@ public class User {
         this.password = password;
     }
 
-    // Getters and Setters (optional for Retrofit if using Gson)
+    // Getters and Setters
     public String getFullName() {
         return fullName;
     }

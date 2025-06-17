@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Make sure this matches your layout XML name
+        setContentView(R.layout.activity_main);
 
         // Initialize views
         etFullName = findViewById(R.id.etFullName);
@@ -39,9 +42,9 @@ public class MainActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
         btnRegister = findViewById(R.id.btnRegister);
-        tvLoginLink = findViewById(R.id.tvLoginLink); // <- Add this TextView in your XML layout
+        tvLoginLink = findViewById(R.id.tvLoginLink);
 
-        // Register button logic
+        // Register button click
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                 String password = etPassword.getText().toString();
                 String confirmPassword = etConfirmPassword.getText().toString();
 
-                // Validation
+                // Input validation
                 if (TextUtils.isEmpty(fullName)) {
                     etFullName.setError("Full Name is required");
                     return;
@@ -73,37 +76,50 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Prepare user object
+                // Create User object
                 User user = new User(fullName, email, phone, password);
 
-                // Call API
+                // Make API call
                 ApiService apiService = ApiClient.getClient().create(ApiService.class);
                 Call<ApiResponse> call = apiService.registerUser(user);
 
-                call.enqueue(new retrofit2.Callback<ApiResponse>() {
+                call.enqueue(new Callback<ApiResponse>() {
                     @Override
-                    public void onResponse(Call<ApiResponse> call, retrofit2.Response<ApiResponse> response) {
+                    public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
+
+                            // Redirect to HomeActivity
+                            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
                         } else {
-                            Toast.makeText(MainActivity.this, "Registration failed!", Toast.LENGTH_SHORT).show();
+                            try {
+                                String errorBody = response.errorBody().string();
+                                Log.e("API_ERROR", "Error response: " + errorBody);
+                                Toast.makeText(MainActivity.this, "Registration failed: " + errorBody, Toast.LENGTH_LONG).show();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(MainActivity.this, "Registration failed: Error reading response", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ApiResponse> call, Throwable t) {
+                        Log.e("API_FAILURE", "Request failed", t);
                         Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
             }
         });
 
-        // Make "Login" part clickable
+        // Clickable login text
         SpannableString ss = new SpannableString("Do you have any account? Login");
         ClickableSpan loginClickable = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                // Navigate to LoginActivity
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
@@ -111,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setColor(Color.YELLOW); // change this color as needed
+                ds.setColor(Color.YELLOW);
                 ds.setUnderlineText(false);
             }
         };
