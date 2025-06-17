@@ -19,6 +19,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import retrofit2.Call;
+
 public class MainActivity extends AppCompatActivity {
 
     EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword;
@@ -71,8 +73,28 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                Toast.makeText(MainActivity.this, "Registered Successfully!\n" +
-                        "Name: " + fullName + "\nEmail: " + email + "\nPhone: " + phone, Toast.LENGTH_LONG).show();
+                // Prepare user object
+                User user = new User(fullName, email, phone, password);
+
+                // Call API
+                ApiService apiService = ApiClient.getClient().create(ApiService.class);
+                Call<ApiResponse> call = apiService.registerUser(user);
+
+                call.enqueue(new retrofit2.Callback<ApiResponse>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse> call, retrofit2.Response<ApiResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Registration failed!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
 
