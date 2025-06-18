@@ -5,16 +5,13 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    // Replace this with your actual backend URL (don't forget trailing slash!)
     private static final String BASE_URL = "http://10.0.2.2:8000/api/";
     private static Retrofit retrofit;
 
     public static Retrofit getClient() {
         if (retrofit == null) {
-
-
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY); // Log full request/response
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
@@ -23,6 +20,7 @@ public class ApiClient {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
+                    .client(client) // <- important: add client for logging
                     .build();
         }
         return retrofit;

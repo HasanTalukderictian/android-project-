@@ -9,11 +9,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -24,15 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
-
-        // Handle edge-to-edge padding
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login_layout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         // Initialize Views
         etLoginEmail = findViewById(R.id.etLoginEmail);
@@ -40,25 +32,43 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvRegisterHere = findViewById(R.id.tvRegisterHere);
 
-        // Login button click
+        // Handle Login button click
         btnLogin.setOnClickListener(view -> {
             String email = etLoginEmail.getText().toString().trim();
             String password = etLoginPassword.getText().toString().trim();
 
             if (validateInputs(email, password)) {
-                if (email.equals("user@example.com") && password.equals("123456")) {
-                    Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, HomeActivity.class));
-                    finish();
-                } else {
-                    Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
-                }
+                // Create login request model
+                LoginRequest loginRequest = new LoginRequest(email, password);
+
+                // Call API
+                ApiService apiService = ApiClient.getClient().create(ApiService.class);
+                Call<ApiResponse> call = apiService.loginUser(loginRequest);
+
+                call.enqueue(new Callback<ApiResponse>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                            finish();
+                        } else {
+                            String message = (response.body() != null) ? response.body().getMessage() : "Login failed";
+                            Toast.makeText(LoginActivity.this, "Error: " + message, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse> call, Throwable t) {
+                        Toast.makeText(LoginActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
 
-        // Navigate to Register
+        // Navigate to registration page
         tvRegisterHere.setOnClickListener(view -> {
-            startActivity(new Intent(this, MainActivity.class));
+            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
         });
     }
 
