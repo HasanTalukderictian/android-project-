@@ -1,15 +1,67 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/cardview_shadow_end_color"
-    tools:context=".HomeFragment">
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:background="#C40064">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- Profile Image -->
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profileImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/profile_image"
+    app:civ_border_width="2dp"
+    app:civ_border_color="@android:color/white"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- User Name -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Home Fragment" />
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hasan Talukder"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/profileImage"
+        app:layout_constraintTop_toTopOf="@+id/profileImage"
+        android:layout_marginStart="8dp" />
 
-</FrameLayout>
+    <!-- Balance Button -->
+    <Button
+        android:id="@+id/balanceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="28dp"
+        android:text="ব্যালেন্স দেখুন"
+        android:textColor="#FFF"
+        android:textSize="10sp"
+        android:background="@drawable/balance_button_bg"
+        app:layout_constraintStart_toStartOf="@+id/userName"
+        app:layout_constraintTop_toBottomOf="@+id/userName"
+        android:layout_marginTop="4dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp" />
+
+    <!-- Trophy Icon -->
+    <ImageView
+        android:id="@+id/trophyIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_trophy"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/kiteIcon"
+    android:layout_marginEnd="16dp" />
+
+    <!-- Kite Icon -->
+    <ImageView
+        android:id="@+id/kiteIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_kite"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
